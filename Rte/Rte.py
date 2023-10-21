@@ -3,6 +3,7 @@ import queue
 import numpy as np
 import hiwonder
 import threading
+import sys
 
 from yolov5_tensorrt import Yolov5TensorRT
 from std_srvs.srv import SetBool

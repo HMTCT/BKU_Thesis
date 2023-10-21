@@ -1,5 +1,8 @@
 #Global config
 
+import os
+import sys
+
 ROS_NODE_NAME = "fruits_classification"
 
 """

@@ -4,9 +4,10 @@ import rospy
 import threading
 
 from sensor_msgs.msg import Image
-from std_srvs.srv import Empty
-from std_msgs.msg import Bool, SetBoolResponse, SetBoolRequest
+from std_srvs.srv import SetBoolResponse, SetBoolRequest
 from std_srvs.srv import Trigger, TriggerResponse
+from std_srvs.srv import Empty
+from std_msgs.msg import Bool
 from jetmax_control.msg import SetServo
 
 from Global.var import HOME, state, jetmax
