@@ -41,6 +41,8 @@ float Jcurr[6]; //current joints value
 
 void setup()
 {
+
+  // Define pin in and output 
   pinMode(PUL1_PIN, OUTPUT);
   pinMode(DIR1_PIN, OUTPUT);
   pinMode(PUL2_PIN, OUTPUT);
@@ -59,6 +61,7 @@ void setup()
   pinMode(EN5_PIN, OUTPUT);
   pinMode(EN6_PIN, OUTPUT);
   
+  // All pin initial signal 
   digitalWrite(PUL1_PIN, LOW); // gear ratio = 96/20 = 4.8
   digitalWrite(DIR1_PIN, LOW); //LOW = negative direction
   
@@ -94,14 +97,15 @@ void setup()
   InverseK(tmp, Jcurr);
   delay(1000);
 
-  Serial.begin(9600);
+  Serial.begin(115200);
+  Serial.println("ACK");
 }
-
+// Main function go here
 void loop()
 {
   
   //--------------------------------------------------------GoGoGo-------------------
-  //testing();
+  // testing();
   readSerial();
   excuteCommand();
 }
@@ -118,7 +122,7 @@ void go_home(){
   singleJointMove(DIR3_PIN, LOW, PUL3_PIN, 6569);
   // joint #5
   singleJointMove(DIR5_PIN, HIGH, PUL5_PIN, (int)(180/dl5));
-  Serial.println("Arm go home");
+  //Serial.println("Arm go home");
 }
 
 void sleep()

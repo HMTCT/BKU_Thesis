@@ -8,7 +8,7 @@ const uint8_t DIR_PIN[6] = {DIR1_PIN, DIR2_PIN, DIR3_PIN, DIR4_PIN, DIR5_PIN, DI
 const double DL[6] = {dl1, dl2, dl3, dl4, dl5, dl6};
 float currJoint[6] = {0, 0, 0, 0, 90, 0};
 
-#define ANGLE_PER_COMMAND      10
+#define ANGLE_PER_COMMAND      2
 const char POSITIVE_DIRECTION = '1';
 const char NEGATIVE_DIRECTION = '2';
 

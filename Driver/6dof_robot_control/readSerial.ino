@@ -4,24 +4,30 @@
 
 //−−−−−−−−−−VARIABLES USED FOR THE SERIAL DATA TRANSFER−−−−−−−−−−//
 #define MAX_DATA_SIZE   10
-bool newCommands = false;                           //new commands available / not available
-char DATA[MAX_DATA_SIZE];                           //Data received is stored here
-bool newExtracted = false;                          //new extracted data available
-const char startChar = '!';                         //Message start
-const char endChar = '#';                           //Message end
-
 #define AUTO_MODE     "goauto"
 #define MANUAL_MODE   "manual"
 #define GO_HOME_CMD   "gohome"
+#define STOP          "000000"
+
+
+bool newCommands = false;                           //new commands available / not available
+char DATA[MAX_DATA_SIZE] = STOP;                    //Data received is stored here
+bool newExtracted = false;                          //new extracted data available
+const char startChar = '!';                         //Message start
+const char endChar = '#';                           //Message end
+const float velG=0.25e-4;
+
+float start_vel = 0.5*velG;
+float end_vel = 0.5*velG;
 
 bool isAuto = false; //Auto mode run first
+bool isStop = false;
 
 void readSerial(){
     static bool dataTransferring = false;       //true if data transfer in progress
     static byte i = 0;                          //index
     char rc;                                    //Received character
-
-    while(Serial.available() > 0 && newCommands == false && i < MAX_DATA_SIZE)
+    while(Serial.available() > 0  && i < MAX_DATA_SIZE)
     {
         rc = Serial.read();                     //Reads one char of the data
         if (rc == startChar){                   //Start data transfer if startChar found
@@ -35,7 +41,7 @@ void readSerial(){
             }
             else{                               //Stop data transfer if endChar found
                 DATA[i]='\0';                   //End the string
-                Serial.println("Received data:");
+                // Serial.println("Received data:");
                 Serial.println(DATA);
                 newCommands = true;             //New data available
                 i = 0;                          //Reset the index
@@ -47,7 +53,7 @@ void readSerial(){
 }
 
 void commandToKinematics(float* Xcurr, float* Jcurr){
-  if (newCommands == false)
+  if (isStop)
     //do nothing
     return;
   float Xnext[6] = {0, 0, 0, 0, 0, 0}; //next pos value
@@ -73,10 +79,11 @@ void commandToKinematics(float* Xcurr, float* Jcurr){
   printCurPos();
   //Reset flag for new command
   newCommands = false;
+  Serial.println("ACK");
 }
 
 void manualCommand(){
-  if (newCommands == false)
+  if (isStop)
     //do nothing 
     return;
   
@@ -84,6 +91,7 @@ void manualCommand(){
     goHomeFromManual();
      //Reset flag for new command
     newCommands = false;
+    Serial.println("ACK");
     return;
   }
   float tmp[6];
@@ -93,27 +101,41 @@ void manualCommand(){
     if (DATA[i] == POSITIVE_DIRECTION){
       //Rotate positive direction
       //singleJointMove(DIR_PIN[i], HIGH, PUL_PIN[i], steps, 2000, 3, 220);
-      currJoint[i] += 10;
+      currJoint[i] += ANGLE_PER_COMMAND;
     }
     else if (DATA[i] == NEGATIVE_DIRECTION){
       //Rotate negative direction
       //singleJointMove(DIR_PIN[i], LOW, PUL_PIN[i], steps, 2000, 3, 220);
-      currJoint[i] -= 10;
+      currJoint[i] -= ANGLE_PER_COMMAND;
     }
   }
-  simultaneousMove(tmp, currJoint, 0.25e-4, 0.75e-10, 0.0, 0.0);
+  
+  simultaneousMove(tmp, currJoint, 0.25e-4, 0.75e-10, start_vel, end_vel);
   printArray(currJoint, 6);
   //Reset flag for new command
   newCommands = false;
+  Serial.println("ACK");
 }
 
 
 void excuteCommand(){
+  if (strcmp(DATA, STOP) == 0){
+    if (isStop == false)
+    {
+      start_vel = 0;
+      Serial.println("KCA");
+    }
+    isStop = true;
+    return;
+  }
+  start_vel = velG*0.5;
+  isStop = false;
   if (strcmp(DATA, AUTO_MODE) == 0 && !isAuto){
     isAuto = true;
     goHomeFromManual();
     //Reset flag for new command
     newCommands = false;
+    Serial.println("ACK");
     return;
   }
   if (strcmp(DATA, MANUAL_MODE) == 0 && isAuto){
@@ -132,5 +154,6 @@ void excuteCommand(){
   else{
     manualCommand();
   }
+
 }
 
