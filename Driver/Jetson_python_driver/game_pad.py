@@ -6,7 +6,8 @@ import threading
 # Initialize pygame
 pygame.init()
 
-serialPort = '/dev/ttyACM0'
+# serialPort = '/dev/ttyACM0'
+serialPort = 'COM3'
 serialBaudrate = 115200
 ack = False
 debounce = 0
@@ -22,7 +23,8 @@ serialObject = serial.Serial(
     stopbits=serial.STOPBITS_ONE, 
     timeout=0.01
 ) 
-
+time.sleep(10)
+serialObject.write(bytes(str("!Initon#"), encoding='utf-8'))
 # INitialize input values
 buffer = [0, 0, 0, 0, 0, 0]
 newValue = False
