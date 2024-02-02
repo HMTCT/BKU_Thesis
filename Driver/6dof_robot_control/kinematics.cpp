@@ -1,4 +1,14 @@
 #include "kinematics.h"
+#include "global.h"
+
+//robot geometry
+const double r1 = 47.0;
+const double r2 = 110.0;
+const double r3 = 26.0; 
+const double d1 = 133.0;
+const double d3 = 0.0;
+const double d4 = 117.50;
+const double d6 = 28.0;
 
 double curPos1 = 0.0;
 double curPos2 = 0.0;

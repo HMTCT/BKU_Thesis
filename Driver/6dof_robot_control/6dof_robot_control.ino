@@ -1,42 +1,8 @@
 /*
 Script to move my tiny 6dof robotic arm
 */
-#include <math.h>
-#include "kinematics.h"
-#include "readSerial.h"
 #include "moving.h"
-
-#define PI 3.1415926535897932384626433832795
-
-//driver for the axis 1
-#define PUL1_PIN 39
-#define DIR1_PIN 37
-//driver for the axis 2
-#define PUL2_PIN 43
-#define DIR2_PIN 41
-//driver for the axis 3
-#define PUL3_PIN 47
-#define DIR3_PIN 45
-//driver for the axis 4
-#define PUL4_PIN 46
-#define DIR4_PIN 48
-//driver for the axis 5
-#define PUL5_PIN A6
-#define DIR5_PIN A7
-//driver for the axis 6
-#define PUL6_PIN A0
-#define DIR6_PIN A1
-
-//enable pin for the axis 3, 2 and 1
-#define EN321_PIN 32
-#define EN4_PIN A8
-#define EN5_PIN A2
-#define EN6_PIN 38
-
-const float Xhome[6] = { 164.5, 0.0, 241.0, 90.0, 180.0, -90.0 };  //{x, y, z, ZYZ Euler angles}
-float Xcurr[6];                                                    //current pos value
-float Jhome[6];                                                    //joints value at home
-float Jcurr[6];                                                    //current joints value
+#include "global.h"
 
 void setup() {
   // Define pin in and output
@@ -86,25 +52,17 @@ void setup() {
   Serial.begin(115200);
 }
 
+ArmMoving arm = ArmMoving();
+
 // Main function go here
 void loop() {
 
   //--------------------------------------------------------GoGoGo-------------------
-  // testing();
-  readSerial();
-  excuteCommand();
+  arm.listen();
+  arm.move();
 }
 
-void init_arm(){
-  ArrayCopy(Xhome, Xcurr);
-  //Init Jcurr base on Xcurr (Xhome)
-  float tmp[6];
-  ArrayCopy(Xcurr, tmp);
-  InverseK(tmp, Jcurr);
-  go_home();
-  setCurPos(0, 0, 0, 0, 90, 0);
-}
-
+#if 0
 void go_home() {
   // enable all joints
   digitalWrite(EN321_PIN, LOW);
@@ -217,3 +175,4 @@ void printArray(float* arr, uint8_t n) {
     Serial.println(arr[i]);
   }
 }
+#endif
