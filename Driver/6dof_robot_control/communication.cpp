@@ -14,7 +14,7 @@
 SerialCommunication::SerialCommunication(){
   this->mode = INIT;
   this->cmd = INVALID;
-  memset(this->DATA, 0, MAX_DATA_SIZE * sizeof(char));
+//  memset(this->DATA, 0, MAX_DATA_SIZE * sizeof(char));
 }
 
 void SerialCommunication::read() {
@@ -48,6 +48,7 @@ void SerialCommunication::validate(){
       if (strcmp(this->DATA, INITIAL_CMD) == 0){
         this->cmd = WAKEUP;
         this->mode = MANUAL;
+        strcpy(this->DATA, STOP_CMD);
       }
       break;
     case MANUAL:
@@ -65,6 +66,7 @@ void SerialCommunication::validate(){
       }
       else if (strcmp(this->DATA, GO_HOME_CMD) == 0){
         this->cmd = GO_HOME;
+        strcpy(this->DATA, STOP_CMD);
       }
       else if (strcmp(this->DATA, GO_FOLD_CMD) == 0){
         this->cmd = GO_FOLD;
@@ -83,6 +85,7 @@ void SerialCommunication::validate(){
       if (strcmp(DATA, GO_HOME_CMD) == 0){
         this->cmd = WAKEUP;
         this->mode = MANUAL;
+        strcpy(this->DATA, STOP_CMD);
       }
       else{
         this->cmd = IDLE;
