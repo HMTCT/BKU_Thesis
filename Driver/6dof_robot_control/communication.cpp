@@ -1,5 +1,4 @@
 #include "communication.h"
-
 //−−−−−−−−−−VARIABLES USED FOR THE SERIAL DATA TRANSFER−−−−−−−−−−//
 
 #define AUTO_CMD    "goauto"
@@ -14,10 +13,11 @@
 SerialCommunication::SerialCommunication(){
   this->mode = INIT;
   this->cmd = INVALID;
-//  memset(this->DATA, 0, MAX_DATA_SIZE * sizeof(char));
+  this->new_data = false;
 }
 
 void SerialCommunication::read() {
+  this->new_data = false;
   static bool dataTransferring = false;  //true if data transfer in progress
   static byte i = 0;                     //index
   char rc;                               //Received character
@@ -33,13 +33,15 @@ void SerialCommunication::read() {
       } 
       else {                //Stop data transfer if endChar found
         DATA[i] = '\0';     //End the string
-        // Serial.println("Received data:");
+        Serial.println("Received data:");
+        this->new_data = true;
         i = 0;                     //Reset the index
         dataTransferring = false;  //Stop data transfer
         Serial.println(DATA);
       }
     }
   }
+ 
 }
 
 void SerialCommunication::validate(){
@@ -55,14 +57,7 @@ void SerialCommunication::validate(){
       if (strcmp(this->DATA, AUTO_CMD) == 0){
         this->cmd = GO_HOME;
         this->mode = AUTO;
-      }
-      else if (strcmp(this->DATA, STOP_CMD) == 0){
-        if (this->cmd == MANUAL_MOVE){
-          this->cmd = STOP;
-        }
-        else{
-          this->cmd = IDLE;
-        }
+        strcpy(this->DATA, STOP_CMD);
       }
       else if (strcmp(this->DATA, GO_HOME_CMD) == 0){
         this->cmd = GO_HOME;
@@ -72,13 +67,45 @@ void SerialCommunication::validate(){
         this->cmd = GO_FOLD;
         this->mode = SLEEP;
       }
-      else{
+      else if (strcmp(this->DATA, STOP_CMD) == 0){
+        if (this->cmd == MANUAL_MOVE){
+          this->cmd = STOP;
+        }
+        else{
+          this->cmd = IDLE;
+        }
+      }
+      else if (this->new_data == true)
+      {
         this->cmd = MANUAL_MOVE;
+      }
+      else 
+      {
+        this->cmd = IDLE;
       }
       break;
     case AUTO:
       if (strcmp(this->DATA, MANUAL_CMD) == 0){
         this->mode = MANUAL;
+        this->cmd = IDLE;
+        strcpy(this->DATA, STOP_CMD);
+      }
+      else if (strcmp(this->DATA, STOP_CMD) != 0  && this->new_data == true)
+      {
+        if (this->cmd == IDLE){
+          Serial.println("PROCESS MOVING COORDINATES");
+          this->cmd = AUTO_MOVE;
+        }
+        else if (this->cmd == AUTO_MOVE){
+          Serial.println("WAIT FOR AXIS");
+          strcpy(this->DATA, STOP_CMD);
+          this->cmd = IDLE;
+        }
+      }
+      else 
+      {
+        //Serial.println("WAIT FOR AXIS");
+        this->cmd = IDLE;
       }
       break;
     case SLEEP:
@@ -104,4 +131,31 @@ CONTROL_CMD SerialCommunication::getCommand(){
 
 char* SerialCommunication::getData(){
   return this->DATA;
+}
+bool SerialCommunication::newData(){
+  return this->new_data;
+}
+void SerialCommunication::getAxis(float* output){
+    String token = "";
+    int i = 0;
+    Serial.println(this->DATA);
+    for (char c : this->DATA) {
+        if (i == 6) return;
+        if (c != ':' && c != '\0') {
+            token += c;
+        } 
+        else {
+            // Convert String to char array
+            char charArray[token.length() + 1]; // +1 for null terminator
+            token.toCharArray(charArray, token.length() + 1);
+            //Convert to float
+            float floatValue = atof(charArray);
+            output[i++] = floatValue;
+            token = "";
+        }
+    }
+    for (int i = 0; i < 6; i++)
+    {
+      Serial.println(output[i]);
+    }
 }
