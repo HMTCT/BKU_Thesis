@@ -3,7 +3,7 @@
 
 #include "Arduino.h"
 
-#define MAX_DATA_SIZE 10
+#define MAX_DATA_SIZE 100
 
 enum CONTROL_MODE{
   INIT,
@@ -18,6 +18,7 @@ enum CONTROL_CMD{
   GO_FOLD,
   STOP,
   MANUAL_MOVE,
+  AUTO_MOVE,
   INVALID
 };
 
@@ -26,11 +27,14 @@ class SerialCommunication {
     CONTROL_MODE mode;
     CONTROL_CMD  cmd;
     char DATA[MAX_DATA_SIZE];   //Data received is stored here
+    bool new_data;              //Verify new data
   public:
       SerialCommunication();
       void read();
       void validate();
       char* getData();
+      void getAxis(float*);
+      bool newData();
       CONTROL_CMD getCommand();
 };
 

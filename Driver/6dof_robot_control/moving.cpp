@@ -31,7 +31,7 @@ void ArmMoving::wakeUp(){
   // joint #3
   singleJointMove(DIR3_PIN, LOW, PUL3_PIN, 6569);
   // joint #5
-  singleJointMove(DIR5_PIN, HIGH, PUL5_PIN, (int)(180 / dl5));
+  singleJointMove(DIR5_PIN, HIGH, PUL5_PIN, (int)(90 / dl5));
   //Serial.println("Arm go home");
 
   memset(this->currJoint, 0, NUM_BYTES_BUFFER);
@@ -56,7 +56,7 @@ void ArmMoving::goFoldFromManual(){
   this->goHomeFromManual();
   // come back from home position to fold position
   // joint #5
-  singleJointMove(DIR5_PIN, LOW, PUL5_PIN, (int)(180 / dl5));
+  singleJointMove(DIR5_PIN, LOW, PUL5_PIN, (int)(90 / dl5));
   // joint #3
   singleJointMove(DIR3_PIN, HIGH, PUL3_PIN, 6569);
   // joint #2
@@ -118,6 +118,19 @@ void ArmMoving::manualControl(char* DATA, float vel0, float acc0, float velini, 
   goStrightLine(tmp, this->currJoint, vel0, acc0, velini, velfin);
 }
 
+void ArmMoving::autoMove(float* Xnext, float vel0, float acc0, float velini, float velfin){
+  float Jcurr[6]; // tmp for this->currJoint;
+  float Xcurr[6]; // current //{x, y, z, ZYZ Euler angles}
+  float Jnext[6]; // target joints
+  memcpy(Jcurr, this->currJoint, NUM_BYTES_BUFFER);
+  ForwardK(Jcurr, Xcurr); // calculate Xcurr by FK
+  InverseK(Xnext, Jnext); // calculate Jnext by IK
+  memcpy(Jcurr, Jnext, NUM_BYTES_BUFFER); //Store Jnext
+  //Move
+  goStrightLine(this->currJoint, Jnext, vel0, acc0, velini, velfin);
+  memcpy(this->currJoint, Jcurr, NUM_BYTES_BUFFER); //Update currJoint
+}
+
 void ArmMoving::listen(){
   this->listener.read();
   this->listener.validate();
@@ -140,6 +153,12 @@ void ArmMoving::move(){
       break;
     case MANUAL_MOVE:
       this->manualControl(this->listener.getData(), 0.25e-4, 0.1 * 0.75e-10, start_vel, end_vel);
+      Serial.println("ACK");
+      break;
+    case AUTO_MOVE:
+      float output[6];
+      this->listener.getAxis(output);
+      this->autoMove(output, 0.25e-4, 0.1 * 0.75e-10, start_vel, end_vel);
       Serial.println("ACK");
       break;
     case STOP:
