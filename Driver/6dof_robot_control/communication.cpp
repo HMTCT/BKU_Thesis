@@ -33,11 +33,13 @@ void SerialCommunication::read() {
       } 
       else {                //Stop data transfer if endChar found
         DATA[i] = '\0';     //End the string
-        Serial.println("Received data:");
         this->new_data = true;
         i = 0;                     //Reset the index
         dataTransferring = false;  //Stop data transfer
+#ifdef DEBUG
+        Serial.println("Received data:");
         Serial.println(DATA);
+#endif
       }
     }
   }
@@ -75,7 +77,7 @@ void SerialCommunication::validate(){
           this->cmd = IDLE;
         }
       }
-      else if (this->new_data == true)
+      else if (this->new_data)
       {
         this->cmd = MANUAL_MOVE;
       }
@@ -90,21 +92,15 @@ void SerialCommunication::validate(){
         this->cmd = IDLE;
         strcpy(this->DATA, STOP_CMD);
       }
-      else if (strcmp(this->DATA, STOP_CMD) != 0  && this->new_data == true)
+      else if (this->new_data)
       {
-        if (this->cmd == IDLE){
-          Serial.println("PROCESS MOVING COORDINATES");
-          this->cmd = AUTO_MOVE;
-        }
-        else if (this->cmd == AUTO_MOVE){
-          Serial.println("WAIT FOR AXIS");
-          strcpy(this->DATA, STOP_CMD);
-          this->cmd = IDLE;
-        }
+        this->cmd = AUTO_MOVE;
+#ifdef DEBUG
+        Serial.println("PROCESS MOVING COORDINATES");
+#endif
       }
       else 
       {
-        //Serial.println("WAIT FOR AXIS");
         this->cmd = IDLE;
       }
       break;
@@ -138,9 +134,8 @@ bool SerialCommunication::newData(){
 void SerialCommunication::getAxis(float* output){
     String token = "";
     int i = 0;
-    Serial.println(this->DATA);
     for (char c : this->DATA) {
-        if (i == 6) return;
+        if (i == 6) break;
         if (c != ':' && c != '\0') {
             token += c;
         } 
@@ -154,8 +149,11 @@ void SerialCommunication::getAxis(float* output){
             token = "";
         }
     }
+#ifdef DEBUG
+    Serial.println("GET AXIS");
     for (int i = 0; i < 6; i++)
     {
       Serial.println(output[i]);
     }
+#endif
 }

@@ -44,4 +44,13 @@ const double DL[6] = {dl1, dl2, dl3, dl4, dl5, dl6};
 const float MAX_JOINT_ANGLE[5] = {80, 80, 60, 90, 90};
 const float MIN_JOINT_ANGLE[5] = {-80, -80, -80, -90, -90};
 
+//Debug flag
+#define DEBUG
+
+/*
+250 <= x <= 220
+-160 <= y <= 160
+49 <= z <= 292
+*/
+
 #endif

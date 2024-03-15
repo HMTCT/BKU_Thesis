@@ -13,6 +13,33 @@ float end_vel = 1 * velG;
 
 #define NUM_BYTES_BUFFER    (6 * sizeof(float))
 
+bool validateJoint(float* input){
+  for (int i = 0; i < 6; ++i){
+    switch (i){
+      case 0:
+        if (input[i] > 90 || input[i] < -90) return false;
+        break; 
+      case 1:
+        if (input[i] > 60 || input[i] < -60) return false;
+        break; 
+      case 2:
+        if (input[i] > 60 || input[i] < -60) return false;
+        break;
+      case 3:
+        if (input[i] > 90 || input[i] < -90) return false;
+        break;
+      case 4:
+        if (input[i] > 120 || input[i] < -90) return false;
+        break;
+      case 5:
+        break;
+      default:
+        break;
+    }
+  }
+  return true;
+}
+
 ArmMoving::ArmMoving(){
   this->cmd = IDLE;
   this->listener = SerialCommunication();
@@ -115,7 +142,19 @@ void ArmMoving::manualControl(char* DATA, float vel0, float acc0, float velini, 
       this->buffer[i] = this->currJoint[i] - 1;
     }
   }
-  goStrightLine(tmp, this->currJoint, vel0, acc0, velini, velfin);
+  if (validateJoint(this->currJoint)){
+#ifdef DEBUG
+    Serial.println("MOVING...");
+    goStrightLine(tmp, this->currJoint, vel0, acc0, velini, velfin);
+#endif
+  }
+  else{
+    memcpy(this->currJoint, tmp, NUM_BYTES_BUFFER);
+    memcpy(this->buffer, tmp, NUM_BYTES_BUFFER);
+#ifdef DEBUG
+    Serial.println("Joint out of range");
+#endif
+  }
 }
 
 void ArmMoving::autoMove(float* Xnext, float vel0, float acc0, float velini, float velfin){
@@ -126,9 +165,29 @@ void ArmMoving::autoMove(float* Xnext, float vel0, float acc0, float velini, flo
   ForwardK(Jcurr, Xcurr); // calculate Xcurr by FK
   InverseK(Xnext, Jnext); // calculate Jnext by IK
   memcpy(Jcurr, Jnext, NUM_BYTES_BUFFER); //Store Jnext
+#ifdef DEBUG
+  Serial.println("JNEXT:");
+  for (int i = 0; i < 6; ++i){
+    Serial.println(Jnext[i]);
+    if (!isfinite(Jnext[i])) {
+        Serial.println("Danger! The number is finite");
+        return;
+    }
+  }
+#endif
   //Move
-  goStrightLine(this->currJoint, Jnext, vel0, acc0, velini, velfin);
-  memcpy(this->currJoint, Jcurr, NUM_BYTES_BUFFER); //Update currJoint
+  if (validateJoint(Jnext)){
+#ifdef DEBUG
+    Serial.println("MOVING...");
+    goStrightLine(this->currJoint, Jnext, vel0, acc0, velini, velfin);
+    memcpy(this->currJoint, Jcurr, NUM_BYTES_BUFFER); //Update currJoint
+#endif
+  }
+  else{
+#ifdef DEBUG
+    Serial.println("Joint out of range");
+#endif
+  }
 }
 
 void ArmMoving::listen(){
