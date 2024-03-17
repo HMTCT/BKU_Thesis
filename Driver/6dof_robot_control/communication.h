@@ -2,6 +2,7 @@
 #define __COMMUNICATION__H
 
 #include "Arduino.h"
+#include "global.h"
 
 #define MAX_DATA_SIZE 100
 

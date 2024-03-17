@@ -4,13 +4,14 @@
 #include "Arduino.h"
 #include "communication.h"
 
-class ArmMoving
-{
+bool validateJoint(float*);
+
+class ArmMoving {
 private:
   CONTROL_CMD cmd;
-  SerialCommunication listener;
   float currJoint[6]; // current joints angle
   float buffer[6];
+  SerialCommunication listener;
 
 public:
   ArmMoving();
