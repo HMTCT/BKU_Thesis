@@ -1,3 +1,4 @@
+#include "Arduino.h"
 #include "kinematics.h"
 #include "moving.h"
 #include "global.h"
@@ -20,7 +21,7 @@ bool validateJoint(float* input){
         if (input[i] > 90 || input[i] < -90) return false;
         break; 
       case 1:
-        if (input[i] > 60 || input[i] < -60) return false;
+        if (input[i] > 87 || input[i] < -60) return false;
         break; 
       case 2:
         if (input[i] > 60 || input[i] < -60) return false;
@@ -218,6 +219,14 @@ void ArmMoving::move(){
       float output[6];
       this->listener.getAxis(output);
       this->autoMove(output, 0.25e-4, 0.1 * 0.75e-10, start_vel, end_vel);
+      Serial.println("ACK");
+      break;
+    case TURN_ON_PUMP:
+      digitalWrite(PUMP_PIN, HIGH);
+      Serial.println("ACK");
+      break;
+    case TURN_OFF_PUMP:
+      digitalWrite(PUMP_PIN, LOW);
       Serial.println("ACK");
       break;
     case STOP:

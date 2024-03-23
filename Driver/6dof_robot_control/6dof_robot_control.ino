@@ -24,6 +24,8 @@ void setup() {
   pinMode(EN5_PIN, OUTPUT);
   pinMode(EN6_PIN, OUTPUT);
 
+  pinMode(PUMP_PIN, OUTPUT);
+
   // All pin initial signal
   digitalWrite(PUL1_PIN, LOW);  // gear ratio = 96/20 = 4.8
   digitalWrite(DIR1_PIN, LOW);  //LOW = negative direction
@@ -49,6 +51,8 @@ void setup() {
   digitalWrite(EN5_PIN, HIGH);
   digitalWrite(EN6_PIN, HIGH);
 
+  digitalWrite(PUMP_PIN, LOW);  //PUMP OFF
+
   Serial.begin(115200);
 }
 
@@ -66,9 +70,9 @@ void loop() {
 void go_home() {
   // enable all joints
   digitalWrite(EN321_PIN, LOW);
-  digitalWrite(EN4_PIN, LOW);
+  //digitalWrite(EN4_PIN, LOW);
   digitalWrite(EN5_PIN, LOW);
-  digitalWrite(EN6_PIN, LOW);
+  //digitalWrite(EN6_PIN, LOW);
   // joint #2
   singleJointMove(DIR2_PIN, HIGH, PUL2_PIN, 5582);
   // joint #3

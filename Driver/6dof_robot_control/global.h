@@ -28,6 +28,8 @@
 #define EN5_PIN   A2
 #define EN6_PIN   38
 
+#define PUMP_PIN  63
+
 //{x, y, z, ZYZ Euler angles} for Home position
 const float Xhome[6] = { 164.5, 0.0, 241.0, 90.0, 180.0, -90.0 };
 

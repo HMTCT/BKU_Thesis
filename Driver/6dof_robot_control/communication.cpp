@@ -9,6 +9,8 @@
 #define GO_FOLD_CMD "gofold"
 #define startChar   '!'         //Message start
 #define endChar     '#'         //Message end
+#define PUMP_ON     "PUMP:ON"
+#define PUMP_OFF    "PUMP:OFF"
 
 SerialCommunication::SerialCommunication(){
   this->mode = INIT;
@@ -90,6 +92,14 @@ void SerialCommunication::validate(){
       if (strcmp(this->DATA, MANUAL_CMD) == 0){
         this->mode = MANUAL;
         this->cmd = IDLE;
+        strcpy(this->DATA, STOP_CMD);
+      }
+      else if (strcmp(this->DATA, PUMP_ON) == 0){
+        this->cmd = TURN_ON_PUMP;
+        strcpy(this->DATA, STOP_CMD);
+      }
+      else if (strcmp(this->DATA, PUMP_OFF) == 0){
+        this->cmd = TURN_OFF_PUMP;
         strcpy(this->DATA, STOP_CMD);
       }
       else if (this->new_data)
