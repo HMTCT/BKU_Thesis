@@ -59,7 +59,7 @@ void ArmMoving::wakeUp(){
   // joint #3
   singleJointMove(DIR3_PIN, LOW, PUL3_PIN, 6569);
   // joint #5
-  singleJointMove(DIR5_PIN, HIGH, PUL5_PIN, (int)(90 / dl5));
+  singleJointMove(DIR5_PIN, HIGH, PUL5_PIN, (int)(180 / dl5));
   //Serial.println("Arm go home");
 
   memset(this->currJoint, 0, NUM_BYTES_BUFFER);

@@ -16,23 +16,34 @@ import sys
 import serial
 
 # The matrix is obtained at Z = 141
-K_values = [[521.2983893968932 ,    0.0,               310.1165090086347],
- [  0.0,                520.4297206491902 , 220.21613563458055],
- [  0.0 ,                0.0    ,             1.0              ]]
+K_values = [[520.5878920236871,    0.0,               308.63922611555165],
+ [  0.0,               519.8497596687193,  220.3444341942921 ],
+ [  0.0,               0.0,                 1.0              ]]
 # Values for R
-R_values = [[-0.01470173416359],
- [ 0.05877006788942],
- [ 1.48890898522158]]
+R_values = [[-0.01689717926734],
+ [ 0.06049339128915],
+ [ 1.48868697380953]]
+
+Distortion = [[-0.48897700370258,  0.32298112475634,  0.00273922139963,  0.0000355525706,
+  -0.1388569310958 ]]
+
+# New_cam = [[174.42768876274144,   0.0,              327.2321845803014 ],
+#  [  0.0,               173.17936102922866, 209.16837237134735],
+#  [  0.0,                 0.0,                 1.0              ]]
+New_cam = [[467.3772858043902,    0.0,               342.4062370637581 ],
+ [  0.0,               495.18207244180184, 232.61804686435005],
+ [  0.0,                 0.0,                 1.0              ]]
 
 # Values for T
-T_values  = [[ -1.53772720717909],
- [-24.1415269908699 ],
- [227.88669936031886]]
+T_values  = [[ -0.89702728290987],
+ [-24.19828732433271],
+ [227.66276204883042]]
 
 K_array = np.array(K_values)
 R_array = np.array(R_values)
 T_array = np.array(T_values)
-
+Dis_array = np.array(Distortion)
+New_array = np.array(New_cam)
 def camera_to_world(cam_mtx, r, t, img_points):
     inv_k = np.asmatrix(cam_mtx).I
     r_mat = np.zeros((3, 3), dtype=np.float64)
@@ -93,7 +104,7 @@ time.sleep(10)
 serialObject.write(bytes(str("!goauto#"), encoding='utf-8'))
 
 
-cap = cv2.VideoCapture(1)
+cap = cv2.VideoCapture(0)
 
 if torch.cuda.is_available():
     print("Confirm CUDA recognized")
@@ -105,13 +116,14 @@ else:
 try:
 # Load a pretrained YOLOv8n model
     # model = YOLO('fruit_check.engine')
-    model = YOLO('./runs/detect/dishdetect2/weights/best.pt')
+    model = YOLO('./runs/detect/dishdetect2/weights/chess.pt')
 except Exception as e:
     print(e)
 
 
 # Image center: 240 320
 # Home coordinates: 164.5, 0.0, 141.0, 90.0, 180.0, -90.0
+# chess board: left right corner 105 -121 105 go by 28 and 121 go by 31
 objects_list = []
 IMAGE_PROC = 1
 GRAP = 2
@@ -127,9 +139,22 @@ while cap.isOpened():
         print("stopped")
         ack = True
     if ack == False: continue
-
-    if state == IMAGE_PROC:
+    elif state == IDLE:
+        print("here")    
+        string = "!164.5:0:241:90:180:-90#"
+        print('send: ', string)
+        serialObject.write(bytes(str(string), encoding='utf-8'))
+        state = IMAGE_PROC
+        ack = False
+        time.sleep(5)
+        string = "!PUMP:OFF#"
+        print('send: ', string)
+        serialObject.write(bytes(str(string), encoding='utf-8'))
+        time.sleep(2)
+                           
+    elif state == IMAGE_PROC:
         ret, frame = cap.read()
+        frame = cv2.undistort(frame, K_array, Dis_array, None, New_array)
         if ret == True:
             start = time.time()
             try: 
@@ -153,8 +178,8 @@ while cap.isOpened():
                     temp_list = []
                     for box in objects:
                         print(box)
-                        *coordinates, _ = camera_to_world(K_array, R_array, T_array, np.array([box[0:2]]).reshape((1, 1, 2)))[0][0]
-                        arm_coordinates = world_to_arm([165, 0, 141], [[coordinates[0]], [coordinates[1]], [0], [1]])
+                        *coordinates, _ = camera_to_world(New_array, R_array, T_array, np.array([box[0:2]]).reshape((1, 1, 2)))[0][0]
+                        arm_coordinates = world_to_arm([164.5, 0, 241], [[coordinates[0]], [coordinates[1]], [0], [1]])
                         temp_list.append(arm_coordinates)
                         print("dist", arm_coordinates)
                     if len(objects_list) == 0: 
@@ -172,19 +197,24 @@ while cap.isOpened():
 
             if cv2.waitKey(1000) & 0xFF == ord('q'):
                 break
-    if state == GRAP:
+    elif state == GRAP:
         object = objects_list.pop()
         angle = np.arctan(object[1][0]/object[0][0])
-        y = object[1][0]+ np.sin(angle)*30
-        x = object[0][0]+ np.cos(angle)*30
-        #string = "!" + str(object[0][0]) + ":" +  str(object[1][0]) + ":47:90:180:-90"
-        string = "!" + str(x) + ":" +  str(y) + ":47:90:180:-90"
+        y = object[1][0]+ np.sin(angle)*10 - (np.sin(angle)/np.abs(np.sin(angle)))*5
+        x = object[0][0]+ np.cos(angle)*10
+        #string = "!" + str(object[0][0]) + ":" +  str(object[1][0]) + ":45:90:180:-90"
+        string = "!" + str(x) + ":" +  str(y) + ":60:90:180:-90"
         string += "#"
         print('send: ', string)
         serialObject.write(bytes(str(string), encoding='utf-8'))
         ack = False
         state = IDLE
-            
+        time.sleep(7)
+        string = "!PUMP:ON#"
+        print('send: ', string)
+        serialObject.write(bytes(str(string), encoding='utf-8'))
+
+    else: break
 cap.release()
 cv2.destroyAllWindows()
     
