@@ -36,7 +36,7 @@ New_cam = [[467.3772858043902,    0.0,               342.4062370637581 ],
 
 # Values for T
 T_values  = [[ -0.89702728290987],
- [-24.19828732433271],
+ [-45.19828732433271],
  [227.66276204883042]]
 
 K_array = np.array(K_values)
@@ -59,8 +59,10 @@ def camera_to_world(cam_mtx, r, t, img_points):
         coords[1][0] = img_pt[0][1]
         coords[2][0] = 1.0
         worldPtCam = np.dot(inv_k, coords)  # 3*3 dot 3*1 = 3*1
+        print(worldPtCam)
         # [x,y,1] * invR
         worldPtPlane = np.dot(inv_r, worldPtCam)  # 3*3 dot 3*1 = 3*1
+        print(worldPtPlane)
         # zc
         scale = transPlaneToCam[2][0] / worldPtPlane[2][0]
         # zc * [x,y,1] * invR
@@ -116,7 +118,7 @@ else:
 try:
 # Load a pretrained YOLOv8n model
     # model = YOLO('fruit_check.engine')
-    model = YOLO('./runs/detect/dishdetect2/weights/chess.pt')
+    model = YOLO('./runs/detect/dishdetect2/weights/best_model.pt')
 except Exception as e:
     print(e)
 
@@ -158,6 +160,20 @@ while cap.isOpened():
         if ret == True:
             start = time.time()
             try: 
+                dot_radius = 3  # Adjust the radius of the dot as needed
+                dot_color = (0, 255, 0)  # Green color, you can adjust this as needed
+                thickness = -1  # Negative thickness to fill the circle
+                #Enable 3 dot to map with the baord
+                cv2.circle(frame, (320, 240), dot_radius, (0, 255, 0), thickness)
+                cv2.circle(frame, (320 + 100, 240), dot_radius, (255, 255, 0), thickness)
+                cv2.circle(frame, (320 - 100, 240), dot_radius, (0, 255, 255), thickness)
+                #Dots used for checking you can enable for a full square
+                # cv2.circle(frame, (320, 240 -100), dot_radius, (0, 255, 0), thickness)
+                # cv2.circle(frame, (320 + 100, 240 -100), dot_radius, (0, 255, 0), thickness)
+                # cv2.circle(frame, (320 - 100, 240 -100), dot_radius, (0, 255, 0), thickness)
+                # cv2.circle(frame, (320, 240 +100), dot_radius, (0, 255, 0), thickness)
+                # cv2.circle(frame, (320 + 100, 240 +100), dot_radius, (0, 255, 0), thickness)
+                # cv2.circle(frame, (320 - 100, 240 +100), dot_radius, (0, 255, 0), thickness)
                 output = model.track(frame, imgsz=640, conf=0.5, device = 0, save = False)
             except Exception as e:
                 # print out the error type and line
@@ -200,8 +216,14 @@ while cap.isOpened():
     elif state == GRAP:
         object = objects_list.pop()
         angle = np.arctan(object[1][0]/object[0][0])
-        y = object[1][0]+ np.sin(angle)*10 - (np.sin(angle)/np.abs(np.sin(angle)))*5
-        x = object[0][0]+ np.cos(angle)*10
+        y = object[1][0]
+        print(y)
+        print((y  - (-6.5))/31)
+        y = -6.5 + np.round((y  - (-6.5))/31)*31 + np.sin(angle)*0
+        x = object[0][0]
+        print(x)
+        print((x  - (215))/28)
+        x = (220 + np.round((x  - (220))/28)*28) + np.cos(angle)*0
         #string = "!" + str(object[0][0]) + ":" +  str(object[1][0]) + ":45:90:180:-90"
         string = "!" + str(x) + ":" +  str(y) + ":60:90:180:-90"
         string += "#"
