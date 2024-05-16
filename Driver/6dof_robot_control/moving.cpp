@@ -14,6 +14,15 @@ float end_vel = 1 * velG;
 
 #define NUM_BYTES_BUFFER    (6 * sizeof(float))
 
+String arrayToString(float a[], int size) {
+  if (size == 0) return "";
+  String result = String(a[0]);
+  for (int i = 1; i < size; ++i) {
+    result += ":" + String(a[i]);
+  }
+  return result;
+}
+
 bool validateJoint(float* input){
   for (int i = 0; i < 6; ++i){
     switch (i){
@@ -59,7 +68,7 @@ void ArmMoving::wakeUp(){
   // joint #3
   singleJointMove(DIR3_PIN, LOW, PUL3_PIN, 6569);
   // joint #5
-  singleJointMove(DIR5_PIN, HIGH, PUL5_PIN, (int)(90 / dl5));
+  singleJointMove(DIR5_PIN, HIGH, PUL5_PIN, (int)(180 / dl5));
   //Serial.println("Arm go home");
 
   memset(this->currJoint, 0, NUM_BYTES_BUFFER);
@@ -84,7 +93,7 @@ void ArmMoving::goFoldFromManual(){
   this->goHomeFromManual();
   // come back from home position to fold position
   // joint #5
-  singleJointMove(DIR5_PIN, LOW, PUL5_PIN, (int)(90 / dl5));
+  singleJointMove(DIR5_PIN, LOW, PUL5_PIN, (int)(180 / dl5));
   // joint #3
   singleJointMove(DIR3_PIN, HIGH, PUL3_PIN, 6569);
   // joint #2
@@ -180,9 +189,11 @@ void ArmMoving::autoMove(float* Xnext, float vel0, float acc0, float velini, flo
   if (validateJoint(Jnext)){
 #ifdef DEBUG
     Serial.println("MOVING...");
-    goStrightLine(this->currJoint, Jnext, vel0, acc0, velini, velfin);
-    memcpy(this->currJoint, Jcurr, NUM_BYTES_BUFFER); //Update currJoint
 #endif
+    goStrightLine(this->currJoint, Jnext, vel0, acc0, velini, velfin);
+    String VR = "<{" + arrayToString(this->currJoint, 6) + "}{" +  arrayToString(Jnext, 6) + "}>";
+    Serial.println(VR);
+    memcpy(this->currJoint, Jcurr, NUM_BYTES_BUFFER); //Update currJoint
   }
   else{
 #ifdef DEBUG

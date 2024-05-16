@@ -27,29 +27,29 @@ void setup() {
   pinMode(PUMP_PIN, OUTPUT);
 
   // All pin initial signal
-  digitalWrite(PUL1_PIN, LOW);  // gear ratio = 96/20 = 4.8
-  digitalWrite(DIR1_PIN, LOW);  //LOW = negative direction
+  // digitalWrite(PUL1_PIN, LOW);  // gear ratio = 96/20 = 4.8
+  // digitalWrite(DIR1_PIN, LOW);  //LOW = negative direction
 
-  digitalWrite(PUL2_PIN, LOW);  // gear ratio = 4
-  digitalWrite(DIR2_PIN, LOW);  //LOW = positive direction
+  // digitalWrite(PUL2_PIN, LOW);  // gear ratio = 4
+  // digitalWrite(DIR2_PIN, LOW);  //LOW = positive direction
 
-  digitalWrite(PUL3_PIN, LOW);  // gear ratio = 5
-  digitalWrite(DIR3_PIN, LOW);  //LOW = negative direction
+  // digitalWrite(PUL3_PIN, LOW);  // gear ratio = 5
+  // digitalWrite(DIR3_PIN, LOW);  //LOW = negative direction
 
-  digitalWrite(PUL4_PIN, LOW);  // gear ratio = 56/20 = 2.8
-  digitalWrite(DIR4_PIN, LOW);  //LOW = positive direction
+  // digitalWrite(PUL4_PIN, LOW);  // gear ratio = 56/20 = 2.8
+  // digitalWrite(DIR4_PIN, LOW);  //LOW = positive direction
 
-  digitalWrite(PUL5_PIN, LOW);  // gear ratio = 42/20 = 2.1
-  digitalWrite(DIR5_PIN, LOW);  //LOW = positive direction
+  // digitalWrite(PUL5_PIN, LOW);  // gear ratio = 42/20 = 2.1
+  // digitalWrite(DIR5_PIN, LOW);  //LOW = positive direction
 
-  digitalWrite(PUL6_PIN, LOW);  // gear ratio = 1
-  digitalWrite(DIR6_PIN, LOW);  //LOW = positive direction
+  // digitalWrite(PUL6_PIN, LOW);  // gear ratio = 1
+  // digitalWrite(DIR6_PIN, LOW);  //LOW = positive direction
 
   // all joints disabled!
-  digitalWrite(EN321_PIN, HIGH);
-  digitalWrite(EN4_PIN, HIGH);
-  digitalWrite(EN5_PIN, HIGH);
-  digitalWrite(EN6_PIN, HIGH);
+  // digitalWrite(EN321_PIN, HIGH);
+  // digitalWrite(EN4_PIN, HIGH);
+  // digitalWrite(EN5_PIN, HIGH);
+  // digitalWrite(EN6_PIN, HIGH);
 
   digitalWrite(PUMP_PIN, LOW);  //PUMP OFF
 
