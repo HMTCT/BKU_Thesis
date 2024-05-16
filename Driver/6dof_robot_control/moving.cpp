@@ -190,8 +190,8 @@ void ArmMoving::autoMove(float* Xnext, float vel0, float acc0, float velini, flo
 #ifdef DEBUG
     Serial.println("MOVING...");
 #endif
-    goStrightLine(this->currJoint, Jnext, vel0, acc0, velini, velfin);
     String VR = "<{" + arrayToString(this->currJoint, 6) + "}{" +  arrayToString(Jnext, 6) + "}>";
+    goStrightLine(this->currJoint, Jnext, vel0, acc0, velini, velfin);
     Serial.println(VR);
     memcpy(this->currJoint, Jcurr, NUM_BYTES_BUFFER); //Update currJoint
   }
