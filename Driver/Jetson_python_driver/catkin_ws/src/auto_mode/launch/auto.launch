@@ -1,0 +1,24 @@
+<launch>
+    <!-- START A GROUP WITH A NAMESPACE -->
+    <group ns="mrp">
+        <node
+            pkg    = "auto_mode"
+            name   = "robot_moving"
+            output = "screen"
+            type   = "moving.py"
+        />
+        <node
+            pkg    = "auto_mode"
+            name   = "cam_processing"
+            output = "screen"
+            type   = "cam_processing.py"
+        />
+
+	<node
+	    pkg = "mqtt_sub_vr"
+	    name = "rtsp_stream"
+	    output = "screen"
+	    type = "rtsp_stream.py"
+	/>
+    </group>
+</launch>
